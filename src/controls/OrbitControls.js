@@ -74,11 +74,9 @@ class OrbitControls {
       // Mouse events start with ESC [
       if (!data.startsWith('\x1b[')) return;
 
-      // Very simple parser for SGR mouse mode: \x1b[<b;x;yM or m
-      const match = /\x1b
-
-\[<(\d+);(\d+);(\d+)([mM])/.exec(data);
-      if (!match) return;
+        // Very simple parser for SGR mouse mode: \x1b[<b;x;yM or m
+        const match = /\x1b\[<(\d+);(\d+);(\d+)([mM])/.exec(data);
+        if (!match) return;
 
       const btn = parseInt(match[1], 10);
       const x = parseInt(match[2], 10);
