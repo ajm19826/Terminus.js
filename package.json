@@ -1,0 +1,21 @@
+{
+  "name": "terminus.js",
+  "version": "1.0.0",
+  "description": "Terminus: ASCII-based 3D rendering engine for the terminal.",
+  "main": "src/index.js",
+  "type": "commonjs",
+  "scripts": {
+    "example:rotating-cube": "node examples/rotating-cube.js",
+    "example:combined-shapes": "node examples/combined-shapes.js",
+    "example:orbit-demo": "node examples/orbit-demo.js"
+  },
+  "keywords": [
+    "ascii",
+    "3d",
+    "engine",
+    "terminal",
+    "renderer"
+  ],
+  "author": "Open Source",
+  "license": "MIT"
+}
