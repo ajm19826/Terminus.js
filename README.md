@@ -14,33 +14,35 @@ Shading is derived from depth: closer points map to brighter characters in a con
 
 ```text
  .:-=+*#%@
+```
+
 The renderer:
+- Builds a view–projection matrix from the camera.
+- Updates world matrices for all scene objects.
+- Projects vertices into normalized device coordinates.
+- Converts them to terminal coordinates.
+- Uses a z-buffer to resolve visibility.
+- Writes characters into a 2D buffer and flushes it to stdout.
 
-Builds a view–projection matrix from the camera.
+## Installation
 
-Updates world matrices for all scene objects.
-
-Projects vertices into normalized device coordinates.
-
-Converts them to terminal coordinates.
-
-Uses a z-buffer to resolve visibility.
-
-Writes characters into a 2D buffer and flushes it to stdout.
-
-Installation
-bash
+```bash
 git clone https://github.com/ajm19826/terminus.js.git
 cd terminus.js
 npm install
-Run examples:
+```
 
-bash
+## Run examples
+
+```bash
 npm run example:rotating-cube
 npm run example:combined-shapes
 npm run example:orbit-demo
-Basic usage
-js
+```
+
+## Basic usage
+
+```js
 const Terminus = require('./src');
 
 const scene = new Terminus.Scene();
@@ -74,98 +76,33 @@ const controls = new Terminus.OrbitControls(camera);
 
 const engine = new Terminus.Engine({ scene, camera, renderer, controls });
 engine.start();
-Keyboard controls:
+```
 
-Arrow keys: orbit around target
+## Controls
 
-+ / -: zoom in/out
-
-W, A, S, D: pan
-
-Ctrl+C: exit
+- Arrow keys: orbit around target  
+- + / -: zoom in/out  
+- W, A, S, D: pan  
+- Ctrl+C: exit
 
 Mouse (in compatible terminals):
+- Drag: orbit
+- Wheel: zoom
 
-Drag: orbit
+## Shape list
 
-Wheel: zoom
-
-Shape list
-Terminus ships with 30+ shapes:
-
-Cube
-
-Box
-
-Sphere
-
-Cylinder
-
-Cone
-
-Pyramid
-
-Torus
-
-Plane
-
-Quad
-
-Prism
-
-Capsule
-
-Wedge
-
-Dome
-
-Ellipsoid
-
-Frustum
-
-Ring
-
-Stair
-
-Arch
-
-Helix
-
-Spiral
-
-Star
-
-Gear
-
-Tube
-
-Triangle
-
-Arrow
-
-Cross
-
-PlusShape
-
-Heart
-
-LShape
-
-TShape
-
-CustomMesh (user-defined vertices)
+Terminus ships with 30+ shapes, including:
+Cube, Box, Sphere, Cylinder, Cone, Pyramid, Torus, Plane, Quad, Prism, Capsule, Wedge, Dome, Ellipsoid, Frustum, Ring, Stair, Arch, Helix, Spiral, Star, Gear, Tube, Triangle, Arrow, Cross, PlusShape, Heart, LShape, TShape, CustomMesh
 
 All shapes:
+- Expose dimensions via LengthA, LengthB, LengthC.
+- Support translation, rotation, scaling via position, rotation, scale.
+- Render as ASCII using the shared renderer.
 
-Expose dimensions via LengthA, LengthB, LengthC.
+## API examples
 
-Support translation, rotation, scaling via position, rotation, scale.
-
-Render as ASCII using the shared renderer.
-
-API examples
-Creating and grouping shapes
-js
+Creating and grouping shapes:
+```js
 const cube = Terminus.Cube({ width: 2, height: 2, depth: 2 });
 const sphere = Terminus.Sphere({ radius: 1.5 });
 
@@ -177,16 +114,20 @@ group.add(cube);
 group.add(sphere);
 
 scene.add(group);
-Custom character ramp
-js
+```
+
+Custom character ramp:
+```js
 const ramp = new Terminus.CharRamp(' .,:;ox%#@');
 const renderer = new Terminus.AsciiRenderer({
   width: 120,
   height: 40,
   ramp
 });
-Custom mesh
-js
+```
+
+Custom mesh:
+```js
 const custom = Terminus.CustomMesh({
   vertices: [
     { x: -1, y: 0, z: 0 },
@@ -197,70 +138,51 @@ const custom = Terminus.CustomMesh({
 
 custom.position.set(0, 0, 0);
 scene.add(custom);
-Camera & controls
-OrbitCamera
+```
 
-radius, theta, phi
+## Camera & controls
 
-setTarget(x, y, z)
+OrbitCamera:
+- radius, theta, phi
+- setTarget(x, y, z)
+- orbit(deltaTheta, deltaPhi)
+- zoom(deltaRadius)
+- pan(dx, dy)
+- updateCamera()
 
-orbit(deltaTheta, deltaPhi)
+OrbitControls:
+- Keyboard + mouse support
+- Configurable rotateSpeed, zoomSpeed, panSpeed
+- update(delta) called each frame by the engine
 
-zoom(deltaRadius)
+## Engine & scene graph
 
-pan(dx, dy)
+Engine:
+- Manages the main loop.
+- Calls controls.update(delta), scene.update(delta), renderer.render(scene, camera).
 
-updateCamera()
+Scene:
+- Root node for all objects.
+- Maintains a flat list of renderable objects.
 
-OrbitControls
+Object3D:
+- position, rotation, scale
+- add(child), remove(child)
+- Parent/child transforms via worldMatrix.
 
-Keyboard + mouse support
+## Roadmap
 
-Configurable rotateSpeed, zoomSpeed, panSpeed
-
-update(delta) called each frame by the engine
-
-Engine & scene graph
-Engine
-
-Manages the main loop.
-
-Calls controls.update(delta), scene.update(delta), renderer.render(scene, camera).
-
-Scene
-
-Root node for all objects.
-
-Maintains a flat list of renderable objects.
-
-Object3D
-
-position, rotation, scale
-
-add(child), remove(child)
-
-Parent/child transforms via worldMatrix.
-
-Roadmap
 Planned improvements:
+- Triangle rasterization for filled surfaces.
+- Multiple lights and basic Lambert shading.
+- Per-object materials (different ramps, density).
+- Off-screen rendering and frame capture.
+- Higher-level primitives (text labels, HUD overlays).
+- TypeScript typings and ESM build.
 
-Triangle rasterization for filled surfaces.
+## Style rules
 
-Multiple lights and basic Lambert shading.
-
-Per-object materials (different ramps, density).
-
-Off-screen rendering and frame capture.
-
-Higher-level primitives (text labels, HUD overlays).
-
-TypeScript typings and ESM build.
-
-Style rules
-Clean, modular architecture (core, scene, camera, controls, ascii, shapes, utils).
-
-No placeholders or pseudo-implementations.
-
-Inline comments only where they clarify math or terminal behavior.
-
-Beginner-friendly API, engine-level internals.
+- Clean, modular architecture (core, scene, camera, controls, ascii, shapes, utils).
+- No placeholders or pseudo-implementations.
+- Inline comments only where they clarify math or terminal behavior.
+- Beginner-friendly API, engine-level internals.
