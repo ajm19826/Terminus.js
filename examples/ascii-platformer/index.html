@@ -2,12 +2,97 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>ASCII Platform Explorer</title>
+  <title>ASCII Platformer + Terminus 3D</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <pre id="screen"></pre>
 
-  <script src="game.js"></script>
-</body>
-</html>
+<div id="container">
+  <pre id="gameScreen"></pre>
+  <pre id="terminusScreen"></pre>
+</div>
+
+<!-- Load Terminus engine (adjust path if needed) -->
+
+<script>
+/*
+  Simple synchronous CommonJS loader for browser usage in examples.
+  It loads ../../src/index.js (CommonJS) and exposes its module.exports as window.Terminus,
+  then loads game.js so it runs after Terminus is available.
+*/
+(function(){
+  const cache = {};
+
+  function getTextSync(url) {
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', url, false); // synchronous
+    try {
+      xhr.send(null);
+    } catch (e) {
+      console.error('Failed to load', url, e);
+      throw e;
+    }
+    if (xhr.status === 200 || xhr.status === 0) return xhr.responseText;
+    throw new Error('Failed to load ' + url + ' (status ' + xhr.status + ')');
+  }
+
+  function resolvePath(request, parentUrl) {
+    // If request is a relative path, resolve against parent. Otherwise resolve against document base.
+    try {
+      if (request.startsWith('.') || request.startsWith('/')) {
+        return new URL(request, parentUrl).href;
+      } else {
+        // Non-relative: try relative to project root (document base)
+        return new URL(request, document.baseURI).href;
+      }
+    } catch (e) {
+      return request;
+    }
+  }
+
+  function loadModule(url) {
+    if (cache[url]) return cache[url].exports;
+
+    const src = getTextSync(url);
+    const module = { exports: {}, filename: url, id: url };
+    cache[url] = module;
+
+    const dirname = url.substring(0, url.lastIndexOf('/') + 1);
+
+    function localRequire(request) {
+      const resolved = resolvePath(request, dirname);
+      return loadModule(resolved);
+    }
+
+    // Wrap and evaluate module code
+    const wrapped = `(function(require, exports, module, __filename, __dirname){
+${src}
+})`;
+    const fn = eval(wrapped); // create function in global scope
+    fn(localRequire, module.exports, module, url, dirname);
+
+    return module.exports;
+  }
+
+  try {
+    // adjust this path if your folder layout differs
+    const terminusUrl = new URL('../../src/index.js', location.href).href;
+    const terminus = loadModule(terminusUrl);
+    // expose globally for examples that expect window.Terminus
+    window.Terminus = terminus;
+
+    // Now load game.js (so it runs after Terminus is defined)
+    const gameUrl = new URL('game.js', location.href).href;
+    const gameCode = getTextSync(gameUrl);
+    const script = document.createElement('script');
+    script.type = 'text/javascript';
+    script.text = gameCode;
+    document.body.appendChild(script);
+  } catch (err) {
+    console.error('Loader error:', err);
+    const pre = document.getElementById('terminusScreen') || document.body;
+    const el = document.createElement('pre');
+    el.textContent = 'Loader error: ' + err.message;
+    document.body.appendChild(el);
+  }
+})();
